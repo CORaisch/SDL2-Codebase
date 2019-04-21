@@ -38,7 +38,7 @@ int main(int argc, char** argv)
         return EXIT_FAILURE;
     }
 
-    // retrieve information on the renderer
+    // retrieve information about the renderer
     SDL_RendererInfo info;
     if(SDL_GetRendererInfo(renderer, &info) < 0)
     {
@@ -50,12 +50,12 @@ int main(int argc, char** argv)
     // create SDL2 texture used as drawing area
     SDL_Texture *texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, wnd.x, wnd.y);
     uint8_t *screen = new uint8_t[wnd.x * wnd.y * 4];
-    uint8_t *origscreen = new uint8_t[64*32*4];
+    uint8_t *origscreen = new uint8_t[64 * 32 * 4];
 
     // set clear color of renderer
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
 
-    // define font
+    // define fonts
     uint8_t fS[8] = {0x00, 0x1C, 0x20, 0x10, 0x08, 0x04, 0x38, 0x00};
     uint8_t fD[8] = {0x00, 0x38, 0x24, 0x24, 0x24, 0x24, 0x38, 0x00};
     uint8_t fL[8] = {0x00, 0x20, 0x20, 0x20, 0x20, 0x20, 0x3C, 0x00};
@@ -66,13 +66,12 @@ int main(int argc, char** argv)
     SDL_Event event;
     while(true)
     {
-        // exit loop by clicking 'x'
+        // exit loop by closing window
         SDL_PollEvent(&event);
         if(event.type == SDL_QUIT)
             break;
 
         // NOTE all the drawing must happen between SDL_RenderClear and SDL_RenderPresent
-        // clear screen once
         SDL_RenderClear(renderer);
 
         // draw colored noise at background of original screen
@@ -84,7 +83,7 @@ int main(int argc, char** argv)
             origscreen[y*64*4 + x*4 + 2] = rand() % 256;     // red
             origscreen[y*64*4 + x*4 + 3] = SDL_ALPHA_OPAQUE; // alpha
         }
-        // render string "SDL2" at foreground of original screen
+        // draw string "SDL2" at foreground of original screen
         SDL_Color color; color.r = icolor; color.g = icolor; color.b = icolor; color.a = SDL_ALPHA_OPAQUE;
         icolor += sign*1;
         if(icolor>=255 || icolor<=0) sign *= -1;
@@ -97,7 +96,7 @@ int main(int argc, char** argv)
         // render 2 at (40,12)
         renderFont(f2, 40, 12, 8, 8, origscreen, 64, 32, color);
 
-        // render colored noise with scaled pixels
+        // render screen with scaled pixels
         for(int i = 0; i < wnd.x*wnd.y; ++i)
         {
             int x = i%wnd.x; int y = i/wnd.x;
@@ -119,6 +118,7 @@ int main(int argc, char** argv)
 
     // clean up and exit
     delete[] screen;
+    delete[] origscreen;
     SDL_DestroyTexture(texture);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
@@ -131,7 +131,7 @@ void renderFont(uint8_t* font, int fx, int fy, int fw, int fh, uint8_t* screen, 
     for(int my = fy; my < fy+fh; ++my)
         for(int mx = fx; mx < fx+fw; ++mx)
         {
-            // dont draw if font exceeds border
+            // dont draw if font exceeds borders
             if(mx<sw && mx>=0 && my<sh && my>=0)
             {
                 // draw pixel whenever fonts' bitmap is set
