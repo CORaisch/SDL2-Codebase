@@ -1,0 +1,5 @@
+#+TITLE: SDL2 Codebase
+#+OPTIONS: tex:t
+#+OPTIONS: toc:nil
+
+This repo contains a few self-made SDL2 snippets, which deal as a lookup for bigger projects.
