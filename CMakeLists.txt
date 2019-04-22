@@ -8,3 +8,6 @@ include_directories (${SDL_INCLUDE_DIRS})
 
 add_executable (sdl2_window src/sdl2_window.cpp)
 target_link_libraries (sdl2_window SDL2::SDL2)
+
+add_executable (sdl2_synthesizer src/sdl2_synthesizer.cpp)
+target_link_libraries (sdl2_synthesizer SDL2::SDL2)
