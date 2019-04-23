@@ -4,8 +4,10 @@
 
 // function prototypes
 void audioCallback(void* userdata, Uint8* stream, int len);
-int16_t sineWave(double time, double freq, double amp);
-int16_t squareWave(double time, double freq, double amp);
+double sineWave(double time, double freq);
+double squareWave(double time, double freq);
+double triangleWave(double time, double freq);
+double sawWave(double time, double freq);
 
 // globals
 double signalFreq = 0.0; // set sine wave of 200Hz
@@ -46,7 +48,7 @@ int main(int argc, char** argv)
     want.freq = sampleRate;
     want.format = AUDIO_S16;
     want.channels = 1;
-    want.samples = 512;
+    want.samples = 128;
     want.callback = audioCallback;
 
     SDL_AudioDeviceID dev = SDL_OpenAudioDevice(NULL, 0, &want, &have, SDL_AUDIO_ALLOW_FORMAT_CHANGE);
@@ -90,7 +92,7 @@ int main(int argc, char** argv)
             // handle keydown events
             for(int i = 0; i < 15; ++i)
             {
-                if((event.type == SDL_KEYDOWN) && (event.key.keysym.scancode == piano[i]))
+                if((event.key.state == SDL_PRESSED) && (event.key.keysym.scancode == piano[i]))
                 {
                     signalFreq = baseFreq * pow(twelveRoot, i);
                     isKeyPressed = true;
@@ -148,6 +150,38 @@ int main(int argc, char** argv)
     return EXIT_SUCCESS;
 }
 
+// function that samples a sine wave with given frequency and amplitude at given time
+double sineWave(double time, double freq)
+{
+    double adaptFreq = 1.0 / (sampleRate / freq);
+    return sin(M_PI * 2 * adaptFreq * time);
+}
+
+// function that samples a square wave with given frequency and amplitude at given time
+double squareWave(double time, double freq)
+{
+    double adaptFreq = 1.0 / (sampleRate / freq);
+    double result = sin(M_PI * 2 * adaptFreq * time);
+    if(result > 0)
+        return 1.0;
+    else
+        return -1.0;
+}
+
+// function that samples a triangle wave with given frequency and amplitude at given time
+double triangleWave(double time, double freq)
+{
+    double adaptFreq = 1.0 / (sampleRate / freq);
+    return asin(sin(M_PI * 2 * adaptFreq * time));
+}
+
+// function that samples a saw wave with given frequency and amplitude at given time
+double sawWave(double time, double freq)
+{
+    double adaptFreq = 1.0 / (sampleRate / freq);
+    return (2.0/M_PI) * (adaptFreq * M_PI * fmod(time, 1.0/adaptFreq) - (M_PI/2.0));
+}
+
 // SDL2 audio callback
 void audioCallback(void* userdata, Uint8* stream, int len) // userdate can be used e.g. for passing the frequency, etc.
 {
@@ -155,35 +189,11 @@ void audioCallback(void* userdata, Uint8* stream, int len) // userdate can be us
     int16_t* buf = (int16_t*) stream;
     for(int i = 0; i < len; ++i)
     {
-        // buf[i] = sineWave(audio_pos, signalFreq, audio_volume);
-        buf[i] = squareWave(audio_pos, signalFreq, audio_volume);
+        int16_t amp = audio_volume * INT16_MAX;
+        buf[i] = amp * sineWave(audio_pos, signalFreq);
+        // buf[i] = amp * squareWave(audio_pos, signalFreq);
+        // buf[i] = amp * triangleWave(audio_pos, signalFreq);
+        // buf[i] = amp * sawWave(audio_pos, signalFreq);
         audio_pos++;
     }
-}
-
-// function that samples a sine wave with given frequency and amplitude at given time
-int16_t sineWave(double time, double freq, double amp)
-{
-    int16_t result;
-    double tpc = sampleRate / freq;
-    double cycles = time / tpc;
-    double rad = 2 * M_PI * cycles;
-    int16_t amplitude = INT16_MAX * amp;
-    result = amplitude * sin(rad);
-    return result;
-}
-
-// function that samples a square wave with given frequency and amplitude at given time
-int16_t squareWave(double time, double freq, double amp)
-{
-    int16_t result;
-    double tpc = sampleRate / freq;
-    double cycles = time / tpc;
-    double rad = 2 * M_PI * cycles;
-    int16_t amplitude = INT16_MAX * amp;
-    result = amplitude * sin(rad);
-    if(result > 0)
-        return amplitude;
-    else
-        return -amplitude;
 }
