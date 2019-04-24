@@ -14,13 +14,13 @@ void setVolume(double vol);
 void printInfo();
 
 // globals
-double signalFreq = 0.0; // set sine wave of 200Hz
-int sampleRate = 44100;
+double signal_freq = 0.0; // set sine wave of 200Hz
+int sample_rate = 44100;
 double audio_volume = 0.2;
 unsigned int audio_pos = 0;
 double audio_freq;
 // values needed to calculate tones
-double baseFreq = 110.0;
+double base_freq = 110.0;
 double twelveRoot = pow(2.0, 1.0/12.0);
 // oscilloscope data
 enum {OSC_SINE, OSC_TRIANGLE, OSC_SAW, OSC_SQUARE};
@@ -53,7 +53,7 @@ int main(int argc, char** argv)
     // setup audio device
     SDL_AudioSpec want, have;
     SDL_memset(&want, 0, sizeof(want));
-    want.freq = sampleRate;
+    want.freq = sample_rate;
     want.format = AUDIO_S16;
     want.channels = 1;
     want.samples = 256;
@@ -73,7 +73,7 @@ int main(int argc, char** argv)
     printf("### Synthesizer Setup ###\n");
 
     // setup playback
-    sampleRate = have.freq; // the sample rate could have been changed by SDL so we should update it
+    sample_rate = have.freq; // the sample rate could have been changed by SDL so we should update it
 
     // start playing tone
     SDL_PauseAudioDevice(dev, 0);
@@ -92,14 +92,16 @@ int main(int argc, char** argv)
         for(int i=0; i<15; ++i)
         {
             if(event_handler.is_key_pressed(piano[i]))
-                signalFreq = baseFreq * pow(twelveRoot, i);
+            {
+                signal_freq = base_freq * pow(twelveRoot, i);
+            }
         }
 
         // make speaker silent if no key is pressed
         if(!event_handler.is_any_key_pressed())
         {
-            signalFreq = 0.0;
-            audio_pos = 0;
+            signal_freq = 0.0;
+            audio_pos = 0; // TODO DEBUG audio_pos only commented for debugging -> uncomment later!!
         }
 
         // handle volume
@@ -110,9 +112,9 @@ int main(int argc, char** argv)
 
         // handle tone pitch
         if(event_handler.is_key_released(SDL_SCANCODE_LEFT))
-            baseFreq -= 10.0;
+            base_freq -= 10.0;
         if(event_handler.is_key_released(SDL_SCANCODE_RIGHT))
-            baseFreq += 10.0;
+            base_freq += 10.0;
 
         // handle oscillator
         if(event_handler.is_key_released(SDL_SCANCODE_1))
@@ -142,7 +144,7 @@ int main(int argc, char** argv)
 void printInfo()
 {
     printf("\033[svolume: %2i%% | Base Frequency: %3.1f Hz | Oscillator: %13s\033[u",
-           int(audio_volume * 100.0), baseFreq, oscNames[oscillator]);
+           int(audio_volume * 100.0), base_freq, oscNames[oscillator]);
 }
 
 void setVolume(double vol)
@@ -159,14 +161,14 @@ void setVolume(double vol)
 // function that samples a sine wave with given frequency and amplitude at given time
 double sineWave(double time, double freq)
 {
-    double adaptFreq = freq / sampleRate;
+    double adaptFreq = freq / sample_rate;
     return sin(M_PI * 2 * adaptFreq * time);
 }
 
 // function that samples a square wave with given frequency and amplitude at given time
 double squareWave(double time, double freq)
 {
-    double adaptFreq = freq / sampleRate;
+    double adaptFreq = freq / sample_rate;
     double result = sin(M_PI * 2 * adaptFreq * time);
     if(result > 0)
         return 1.0;
@@ -177,14 +179,14 @@ double squareWave(double time, double freq)
 // function that samples a triangle wave with given frequency and amplitude at given time
 double triangleWave(double time, double freq)
 {
-    double adaptFreq = freq / sampleRate;
+    double adaptFreq = freq / sample_rate;
     return asin(sin(M_PI * 2 * adaptFreq * time));
 }
 
 // function that samples a saw wave with given frequency and amplitude at given time
 double sawWave(double time, double freq)
 {
-    double adaptFreq = freq / sampleRate;
+    double adaptFreq = freq / sample_rate;
     return (2.0/M_PI) * (adaptFreq * M_PI * fmod(time, 1.0/adaptFreq) - (M_PI/2.0));
 }
 
@@ -199,16 +201,18 @@ void audioCallback(void* userdata, Uint8* stream, int len) // userdate can be us
         switch(oscillator)
         {
         case OSC_SINE:
-            buf[i] = vol * sineWave(audio_pos, signalFreq);
+            buf[i] = vol * sineWave(audio_pos, signal_freq);
+            // buf[i] = vol * (sineWave(audio_pos, base_freq*pow(twelveRoot, 4)) + sineWave(audio_pos, base_freq*pow(twelveRoot, 13)));
+            // buf[i] = vol * (0.2*triangleWave(audio_pos, signal_freq*3.5) + sineWave(audio_pos, signal_freq));
             break;
         case OSC_TRIANGLE:
-            buf[i] = vol * triangleWave(audio_pos, signalFreq);
+            buf[i] = vol * triangleWave(audio_pos, signal_freq);
             break;
         case OSC_SAW:
-            buf[i] = vol * sawWave(audio_pos, signalFreq);
+            buf[i] = vol * sawWave(audio_pos, signal_freq);
             break;
         case OSC_SQUARE:
-            buf[i] = vol * squareWave(audio_pos, signalFreq);
+            buf[i] = vol * squareWave(audio_pos, signal_freq);
         }
         audio_pos++;
     }
