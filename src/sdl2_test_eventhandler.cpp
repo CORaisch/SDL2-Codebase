@@ -41,6 +41,7 @@ int main(int argc, char** argv)
 
         // beg DEBUGGING
         event_handler.print_keymap();
+        // printf("%i\n", event_handler.is_any_key_pressed());
         // end DEBUGGING
 
         // render something simple into window -> cosmetics..
