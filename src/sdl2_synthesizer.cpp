@@ -56,7 +56,7 @@ int main(int argc, char** argv)
     want.freq = sampleRate;
     want.format = AUDIO_S16;
     want.channels = 1;
-    want.samples = 128;
+    want.samples = 256;
     want.callback = audioCallback;
 
     SDL_AudioDeviceID dev = SDL_OpenAudioDevice(NULL, 0, &want, &have, SDL_AUDIO_ALLOW_FORMAT_CHANGE);
