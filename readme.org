@@ -7,4 +7,7 @@ This repo contains a few self-made SDL2 snippets, which deal as a lookup for big
 * TODOs
 ** extend event handler
 *** add mouse events
+** extend synthesizer
+*** add multiple voices
+*** get rid of click sounds on key releases
 ** add crazy mode -> macro pixel noise + weird square sounds
