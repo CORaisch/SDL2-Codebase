@@ -193,22 +193,22 @@ void audioCallback(void* userdata, Uint8* stream, int len) // userdate can be us
 {
     len /= 2; // len is in bytes. We are using 16 bit signal <=> 2 Bytes one sample -> len == number of samples
     int16_t* buf = (int16_t*) stream;
-    int16_t amp = audio_volume * INT16_MAX;
+    int16_t vol = audio_volume * INT16_MAX;
     for(int i = 0; i < len; ++i)
     {
         switch(oscillator)
         {
         case OSC_SINE:
-            buf[i] = amp * sineWave(audio_pos, signalFreq);
+            buf[i] = vol * sineWave(audio_pos, signalFreq);
             break;
         case OSC_TRIANGLE:
-            buf[i] = amp * triangleWave(audio_pos, signalFreq);
+            buf[i] = vol * triangleWave(audio_pos, signalFreq);
             break;
         case OSC_SAW:
-            buf[i] = amp * sawWave(audio_pos, signalFreq);
+            buf[i] = vol * sawWave(audio_pos, signalFreq);
             break;
         case OSC_SQUARE:
-            buf[i] = amp * squareWave(audio_pos, signalFreq);
+            buf[i] = vol * squareWave(audio_pos, signalFreq);
         }
         audio_pos++;
     }
