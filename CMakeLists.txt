@@ -14,3 +14,6 @@ target_link_libraries (sdl2_synthesizer SDL2::SDL2)
 
 add_executable (sdl2_eventhandler src/sdl2_test_eventhandler.cpp src/sdl2_eventhandler.cpp)
 target_link_libraries (sdl2_eventhandler SDL2::SDL2)
+
+add_executable (sdl2_crazy src/sdl2_crazy.cpp)
+target_link_libraries (sdl2_crazy SDL2::SDL2)

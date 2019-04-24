@@ -15,11 +15,9 @@ void setVolume(double vol);
 void printInfo();
 
 // globals
-double signal_freq = 0.0; // set sine wave of 200Hz
 int sample_rate = 44100;
 double audio_volume = 0.2;
 unsigned int audio_pos = 0;
-double audio_freq;
 // values needed to calculate tones
 double base_freq = 110.0;
 double twelveRoot = pow(2.0, 1.0/12.0);
@@ -97,7 +95,6 @@ int main(int argc, char** argv)
             // set note frequency on key down
             if(event_handler.is_key_pressed(piano[i]))
             {
-                // signal_freq = base_freq * pow(twelveRoot, i);
                 voices[i] = base_freq * pow(twelveRoot, i);
             }
             // set silent frequency on key release
@@ -107,10 +104,9 @@ int main(int argc, char** argv)
             }
         }
 
-        // make speaker silent if no key is pressed
+        // reset time pointer if no key is pressed -> prevent overflow
         if(!event_handler.is_any_key_pressed())
         {
-            // signal_freq = 0.0;
             audio_pos = 0; // TODO DEBUG audio_pos only commented for debugging -> uncomment later!!
         }
 
