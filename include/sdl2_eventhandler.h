@@ -12,6 +12,8 @@ public:
     void update_events();
     bool is_key_pressed(int scancode);
     bool is_key_pressed(const char* keyname);
+    bool is_key_released(int scancode);
+    bool is_key_released(const char* keyname);
     bool is_any_key_pressed();
     bool is_running();
 
@@ -21,7 +23,8 @@ public:
 private:
     bool _isRunning;
     SDL_Event _event;
-    bool *_scancodes;
+    bool *_scancodes_pressed;
+    bool *_scancodes_released;
 };
 
 #endif
