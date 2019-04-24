@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <cstdlib>
+#include <vector>
 #include <SDL2/SDL.h>
 #include "sdl2_eventhandler.h"
 
@@ -26,6 +27,8 @@ double twelveRoot = pow(2.0, 1.0/12.0);
 enum {OSC_SINE, OSC_TRIANGLE, OSC_SAW, OSC_SQUARE};
 int oscillator = OSC_SINE;
 const char* oscNames[4] = {"Sine Wave", "Triangle Wave", "Saw Wave", "Square Wave"};
+// polyphony
+std::vector<double> voices(15, 0.0);
 
 int main(int argc, char** argv)
 {
@@ -91,16 +94,23 @@ int main(int argc, char** argv)
         // check for piano key
         for(int i=0; i<15; ++i)
         {
+            // set note frequency on key down
             if(event_handler.is_key_pressed(piano[i]))
             {
-                signal_freq = base_freq * pow(twelveRoot, i);
+                // signal_freq = base_freq * pow(twelveRoot, i);
+                voices[i] = base_freq * pow(twelveRoot, i);
+            }
+            // set silent frequency on key release
+            if(event_handler.is_key_released(piano[i]))
+            {
+                voices[i] = 0.0;
             }
         }
 
         // make speaker silent if no key is pressed
         if(!event_handler.is_any_key_pressed())
         {
-            signal_freq = 0.0;
+            // signal_freq = 0.0;
             audio_pos = 0; // TODO DEBUG audio_pos only commented for debugging -> uncomment later!!
         }
 
@@ -201,18 +211,36 @@ void audioCallback(void* userdata, Uint8* stream, int len) // userdate can be us
         switch(oscillator)
         {
         case OSC_SINE:
-            buf[i] = vol * sineWave(audio_pos, signal_freq);
-            // buf[i] = vol * (sineWave(audio_pos, base_freq*pow(twelveRoot, 4)) + sineWave(audio_pos, base_freq*pow(twelveRoot, 13)));
-            // buf[i] = vol * (0.2*triangleWave(audio_pos, signal_freq*3.5) + sineWave(audio_pos, signal_freq));
+        {
+            double sum = 0.0;
+            for(int n=0; n<15; ++n)
+                sum += sineWave(audio_pos, voices[n]);
+            buf[i] = vol * sum;
             break;
+        }
         case OSC_TRIANGLE:
-            buf[i] = vol * triangleWave(audio_pos, signal_freq);
+        {
+            double sum = 0.0;
+            for(int n=0; n<15; ++n)
+                sum += triangleWave(audio_pos, voices[n]);
+            buf[i] = vol * sum;
             break;
+        }
         case OSC_SAW:
-            buf[i] = vol * sawWave(audio_pos, signal_freq);
+        {
+            double sum = 0.0;
+            for(int n=0; n<15; ++n)
+                sum += sawWave(audio_pos, voices[n]);
+            buf[i] = vol * sum;
             break;
+        }
         case OSC_SQUARE:
-            buf[i] = vol * squareWave(audio_pos, signal_freq);
+        {
+            double sum = 0.0;
+            for(int n=0; n<15; ++n)
+                sum += squareWave(audio_pos, voices[n]);
+            buf[i] = vol * sum;
+        }
         }
         audio_pos++;
     }
