@@ -15,7 +15,8 @@ void setVolume(double vol);
 void printInfo();
 
 // globals
-int sample_rate = 44100;
+// int sample_rate = 44100;
+int sample_rate = 22050;
 double audio_volume = 0.2;
 // values needed to calculate tones
 std::vector<unsigned int> audio_positions(15, 0);
@@ -27,8 +28,8 @@ int oscillator = OSC_SINE;
 const char* oscNames[4] = {"Sine Wave", "Triangle Wave", "Saw Wave", "Square Wave"};
 // support for multiple voices
 std::vector<double> voices(15, 0.0);
-// set envelops
-std::vector<Envelop> envelops(15, Envelop());
+// set envelopes
+std::vector<Envelope> envelopes(15, Envelope());
 
 int main(int argc, char** argv)
 {
@@ -98,13 +99,13 @@ int main(int argc, char** argv)
             if(event_handler.is_key_pressed(piano[i]))
             {
                 voices[i] = base_freq * pow(twelveRoot, i);
-                envelops[i].onKeydown();
+                envelopes[i].onKeydown();
             }
             // set silent frequency on key release
             if(event_handler.is_key_released(piano[i]))
             {
                 audio_positions[i] = 0;
-                envelops[i].onKeyup();
+                envelopes[i].onKeyup();
             }
         }
 
@@ -208,7 +209,7 @@ void audioCallback(void* userdata, Uint8* stream, int len) // userdate can be us
         {
             double sum = 0.0;
             for(int n=0; n<15; ++n)
-                sum += envelops[n].getAmplitude() * sineWave(audio_positions[n]++, voices[n]);
+                sum += envelopes[n].getAmplitude() * sineWave(audio_positions[n]++, voices[n]);
             buf[i] = vol * sum;
             break;
         }
@@ -216,7 +217,7 @@ void audioCallback(void* userdata, Uint8* stream, int len) // userdate can be us
         {
             double sum = 0.0;
             for(int n=0; n<15; ++n)
-                sum += envelops[n].getAmplitude() * triangleWave(audio_positions[n]++, voices[n]);
+                sum += envelopes[n].getAmplitude() * triangleWave(audio_positions[n]++, voices[n]);
             buf[i] = vol * sum;
             break;
         }
@@ -224,7 +225,7 @@ void audioCallback(void* userdata, Uint8* stream, int len) // userdate can be us
         {
             double sum = 0.0;
             for(int n=0; n<15; ++n)
-                sum += envelops[n].getAmplitude() * sawWave(audio_positions[n]++, voices[n]);
+                sum += envelopes[n].getAmplitude() * sawWave(audio_positions[n]++, voices[n]);
             buf[i] = vol * sum;
             break;
         }
@@ -232,7 +233,7 @@ void audioCallback(void* userdata, Uint8* stream, int len) // userdate can be us
         {
             double sum = 0.0;
             for(int n=0; n<15; ++n)
-                sum += envelops[n].getAmplitude() * squareWave(audio_positions[n]++, voices[n]);
+                sum += envelopes[n].getAmplitude() * squareWave(audio_positions[n]++, voices[n]);
             buf[i] = vol * sum;
         }
         }

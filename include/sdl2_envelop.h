@@ -5,7 +5,7 @@
 #include <cstdlib>
 #include "SDL2/SDL.h"
 
-class Envelop
+class Envelope
 {
 public:
     // time parameters
@@ -17,7 +17,7 @@ public:
     bool b_keydown;
 
     // default constructor
-    Envelop()
+    Envelope()
     {
         t_attack = 0.1;
         t_decay = 0.01;
