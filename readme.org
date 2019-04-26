@@ -8,6 +8,7 @@ This repo contains a few self-made SDL2 snippets, which deal as a lookup for big
 ** extend event handler
 *** add mouse events
 ** extend synthesizer
-*** get rid of click sounds on key releases
-**** add envelop to model attack, decay, sustain and release (the latter should cancle the clicky sounds)
+*** add envelop to model attack, decay, sustain and release (the latter should cancle the clicky sounds)
+**** envelop added but its bugged: when you are on one tone for quite a while the tone will become noisy after a while
+*** investigate click sounds on key releases
 *** model some nice instruments

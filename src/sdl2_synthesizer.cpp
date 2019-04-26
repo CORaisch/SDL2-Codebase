@@ -3,7 +3,7 @@
 #include <vector>
 #include <SDL2/SDL.h>
 #include "sdl2_eventhandler.h"
-
+#include "sdl2_envelop.h"
 
 // function prototypes
 void audioCallback(void* userdata, Uint8* stream, int len);
@@ -17,21 +17,23 @@ void printInfo();
 // globals
 int sample_rate = 44100;
 double audio_volume = 0.2;
-unsigned int audio_pos = 0;
 // values needed to calculate tones
+std::vector<unsigned int> audio_positions(15, 0);
 double base_freq = 110.0;
 double twelveRoot = pow(2.0, 1.0/12.0);
 // oscilloscope data
 enum {OSC_SINE, OSC_TRIANGLE, OSC_SAW, OSC_SQUARE};
 int oscillator = OSC_SINE;
 const char* oscNames[4] = {"Sine Wave", "Triangle Wave", "Saw Wave", "Square Wave"};
-// polyphony
+// support for multiple voices
 std::vector<double> voices(15, 0.0);
+// set envelops
+std::vector<Envelop> envelops(15, Envelop());
 
 int main(int argc, char** argv)
 {
     // init SDL2 audio and event handling subsystems
-    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
+    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER);
 
     // open window to allow event handling
     SDL_Window *window;
@@ -96,18 +98,14 @@ int main(int argc, char** argv)
             if(event_handler.is_key_pressed(piano[i]))
             {
                 voices[i] = base_freq * pow(twelveRoot, i);
+                envelops[i].onKeydown();
             }
             // set silent frequency on key release
             if(event_handler.is_key_released(piano[i]))
             {
-                voices[i] = 0.0;
+                audio_positions[i] = 0;
+                envelops[i].onKeyup();
             }
-        }
-
-        // reset time pointer if no key is pressed -> prevent overflow
-        if(!event_handler.is_any_key_pressed())
-        {
-            audio_pos = 0; // TODO DEBUG audio_pos only commented for debugging -> uncomment later!!
         }
 
         // handle volume
@@ -210,7 +208,7 @@ void audioCallback(void* userdata, Uint8* stream, int len) // userdate can be us
         {
             double sum = 0.0;
             for(int n=0; n<15; ++n)
-                sum += sineWave(audio_pos, voices[n]);
+                sum += envelops[n].getAmplitude() * sineWave(audio_positions[n]++, voices[n]);
             buf[i] = vol * sum;
             break;
         }
@@ -218,7 +216,7 @@ void audioCallback(void* userdata, Uint8* stream, int len) // userdate can be us
         {
             double sum = 0.0;
             for(int n=0; n<15; ++n)
-                sum += triangleWave(audio_pos, voices[n]);
+                sum += envelops[n].getAmplitude() * triangleWave(audio_positions[n]++, voices[n]);
             buf[i] = vol * sum;
             break;
         }
@@ -226,7 +224,7 @@ void audioCallback(void* userdata, Uint8* stream, int len) // userdate can be us
         {
             double sum = 0.0;
             for(int n=0; n<15; ++n)
-                sum += sawWave(audio_pos, voices[n]);
+                sum += envelops[n].getAmplitude() * sawWave(audio_positions[n]++, voices[n]);
             buf[i] = vol * sum;
             break;
         }
@@ -234,10 +232,9 @@ void audioCallback(void* userdata, Uint8* stream, int len) // userdate can be us
         {
             double sum = 0.0;
             for(int n=0; n<15; ++n)
-                sum += squareWave(audio_pos, voices[n]);
+                sum += envelops[n].getAmplitude() * squareWave(audio_positions[n]++, voices[n]);
             buf[i] = vol * sum;
         }
         }
-        audio_pos++;
     }
 }
