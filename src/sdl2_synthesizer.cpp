@@ -103,10 +103,10 @@ int main(int argc, char** argv)
             }
             // set silent frequency on key release
             if(event_handler.is_key_released(piano[i]))
-            {
-                audio_positions[i] = 0;
                 envelopes[i].onKeyup();
-            }
+            // check if audio position can be resetted -> preventing overflow
+            if(envelopes[i].getAmplitude() < 1e-5)
+                audio_positions[i] = 0;
         }
 
         // handle volume

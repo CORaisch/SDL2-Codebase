@@ -13,5 +13,4 @@ This repo contains a few self-made SDL2 snippets, which deal as a lookup for big
 ***** it seems that the bug comes from the device buffer that will filled up after a while and then cannot recover since the callback loop takes too long
 ****** temporarily solved the bug by reducing the sample rate, in that way the device will demand for less data per second -> more time for the callback loop
 ****** TODO try to solve the bug using the SDL_PauseAudioDevice function to turn off the sound when no key is pressed.
-*** investigate click sounds on key releases
 *** model some nice instruments

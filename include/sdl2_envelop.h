@@ -71,7 +71,6 @@ public:
         // avoid negative amplitudes, so cut off early on
         if(amp < 1e-5) amp = 0.0;
 
-        /* return 0.0; */
         return amp;
     }
 
