@@ -3,9 +3,9 @@
 Event_Handler::Event_Handler()
 {
     _scancodes_pressed = new bool[285];
-    memset(_scancodes_pressed, 0, 285);
+    memset(_scancodes_pressed, 0, sizeof(bool)*285);
     _scancodes_released = new bool[285];
-    memset(_scancodes_released, 0, 285);
+    memset(_scancodes_released, 0, sizeof(bool)*285);
     _isRunning = true;
 }
 
